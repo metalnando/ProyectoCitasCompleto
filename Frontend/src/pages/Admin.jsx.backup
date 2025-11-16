@@ -1,0 +1,70 @@
+import { Container, Card, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
+
+const Admin = () => {
+  return (
+    <Container className="my-5">
+      <h1 className="text-center mb-4 fw-bold" style={{ color: "#48C9B0" }}>
+        Panel de Administración
+      </h1>
+      <p className="text-center text-muted mb-5">
+        Gestiona los recursos de tu consultorio odontológico
+      </p>
+
+      <Row className="g-4">
+        <Col md={6}>
+          <Link to="/admin/medicos" style={{ textDecoration: "none" }}>
+            <Card className="shadow-lg h-100 hover-card" style={{ cursor: "pointer", transition: "transform 0.2s" }}>
+              <Card.Body className="text-center p-5">
+                <i className="bi bi-person-badge" style={{ fontSize: "4rem", color: "#48C9B0" }}></i>
+                <h3 className="mt-3 fw-bold" style={{ color: "#48C9B0" }}>
+                  Gestionar Médicos
+                </h3>
+                <p className="text-muted mt-3">
+                  Agregar, editar o eliminar médicos especialistas del consultorio
+                </p>
+                <div className="mt-4">
+                  <span className="badge" style={{ backgroundColor: "#48C9B0", fontSize: "0.9rem", padding: "8px 16px" }}>
+                    <i className="bi bi-arrow-right-circle me-2"></i>
+                    Ir a Médicos
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+          </Link>
+        </Col>
+
+        <Col md={6}>
+          <Link to="/admin/tratamientos" style={{ textDecoration: "none" }}>
+            <Card className="shadow-lg h-100 hover-card" style={{ cursor: "pointer", transition: "transform 0.2s" }}>
+              <Card.Body className="text-center p-5">
+                <i className="bi bi-heart-pulse" style={{ fontSize: "4rem", color: "#48C9B0" }}></i>
+                <h3 className="mt-3 fw-bold" style={{ color: "#48C9B0" }}>
+                  Gestionar Tratamientos
+                </h3>
+                <p className="text-muted mt-3">
+                  Agregar, editar o eliminar procedimientos y tratamientos disponibles
+                </p>
+                <div className="mt-4">
+                  <span className="badge" style={{ backgroundColor: "#48C9B0", fontSize: "0.9rem", padding: "8px 16px" }}>
+                    <i className="bi bi-arrow-right-circle me-2"></i>
+                    Ir a Tratamientos
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+          </Link>
+        </Col>
+      </Row>
+
+      <style>{`
+        .hover-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 25px rgba(72, 201, 176, 0.3) !important;
+        }
+      `}</style>
+    </Container>
+  );
+};
+
+export default Admin;
