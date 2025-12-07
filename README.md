@@ -23,8 +23,7 @@ Sistema completo de gestión de citas médicas para consultorios dentales, desar
 ### Funcionalidades Técnicas
 - Autenticación JWT con refresh tokens
 - Subida y gestión de imágenes
-- Integración con MongoDB Atlas
-- API RESTful completa
+- Integración con MongoDB 
 - Validación de datos
 - Protección de rutas por roles
 
@@ -195,7 +194,7 @@ La aplicación se ejecutará en `http://localhost:5173`
   medicoTelefono: String (requerido),
   medicoEmail: String (requerido),
   especialidad: String (default: 'General'),
-  imagen: String // Ruta de la foto
+  imagen: String // Ruta para subit la foto
 }
 ```
 
@@ -321,13 +320,10 @@ npm run lint         # Linter
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Crear Pull Request
 
-## Licencia
-
-Este proyecto está bajo la Licencia MIT.
 
 ## Autor
 
-Desarrollado por **Fernando** - [@metalnando](https://github.com/metalnando)
+Desarrollado por **Hernando Moreno** - [@metalnando](https://github.com/metalnando)
 
 ## Agradecimientos
 
