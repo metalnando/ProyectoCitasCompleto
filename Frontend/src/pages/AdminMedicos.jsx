@@ -6,6 +6,9 @@ import { API_BASE_URL } from "../config/api";
 const AdminMedicos = () => {
   const [medicos, setMedicos] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedMedicoForPassword, setSelectedMedicoForPassword] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [editingMedico, setEditingMedico] = useState(null);
   const [success, setSuccess] = useState("");
@@ -148,14 +151,39 @@ const AdminMedicos = () => {
     }
   };
 
+  const handleShowPasswordModal = (medico) => {
+    setSelectedMedicoForPassword(medico);
+    setNewPassword("");
+    setShowPasswordModal(true);
+  };
+
+  const handleSetPassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    setLoading(true);
+    const result = await medicosService.establecerPassword(selectedMedicoForPassword._id, newPassword);
+    if (result.success) {
+      setSuccess(`Contraseña establecida para Dr. ${selectedMedicoForPassword.medicoNombre}`);
+      setShowPasswordModal(false);
+      setNewPassword("");
+      setTimeout(() => setSuccess(""), 3000);
+    } else {
+      setError("Error al establecer contraseña: " + result.message);
+    }
+    setLoading(false);
+  };
+
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold" style={{ color: "#48C9B0" }}>
+        <h2 className="fw-bold text-primary-odont">
           Administrar Médicos
         </h2>
         <Button
-          style={{ backgroundColor: "#48C9B0", border: "none" }}
+          variant="primary"
           onClick={() => handleShowModal()}
         >
           <i className="bi bi-plus-circle me-2"></i>
@@ -169,7 +197,7 @@ const AdminMedicos = () => {
       <Card className="shadow-lg">
         <Card.Body>
           <Table responsive hover>
-            <thead style={{ backgroundColor: "#48C9B0", color: "white" }}>
+            <thead className="card-header-primary">
               <tr>
                 <th>Foto</th>
                 <th>Nombre</th>
@@ -202,16 +230,11 @@ const AdminMedicos = () => {
                         />
                       ) : (
                         <div
+                          className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
                           style={{
                             width: 50,
                             height: 50,
-                            borderRadius: "50%",
-                            backgroundColor: "#48C9B0",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "white",
-                            fontWeight: "bold",
+                            backgroundColor: "var(--primary-odont)",
                           }}
                         >
                           {medico.medicoNombre?.charAt(0)}
@@ -232,15 +255,26 @@ const AdminMedicos = () => {
                       <Button
                         variant="warning"
                         size="sm"
-                        className="me-2"
+                        className="me-1"
                         onClick={() => handleShowModal(medico)}
+                        title="Editar"
                       >
                         <i className="bi bi-pencil"></i>
+                      </Button>
+                      <Button
+                        variant="info"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleShowPasswordModal(medico)}
+                        title="Establecer contraseña"
+                      >
+                        <i className="bi bi-key"></i>
                       </Button>
                       <Button
                         variant="danger"
                         size="sm"
                         onClick={() => handleEliminar(medico._id)}
+                        title="Eliminar"
                       >
                         <i className="bi bi-trash"></i>
                       </Button>
@@ -255,7 +289,7 @@ const AdminMedicos = () => {
 
       {/* Modal para crear/editar médico */}
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton style={{ backgroundColor: "#48C9B0", color: "white" }}>
+        <Modal.Header closeButton className="modal-header-primary">
           <Modal.Title>
             {editingMedico ? "Editar Médico" : "Nuevo Médico"}
           </Modal.Title>
@@ -400,7 +434,7 @@ const AdminMedicos = () => {
               </Button>
               <Button
                 type="submit"
-                style={{ backgroundColor: "#48C9B0", border: "none" }}
+                variant="primary"
                 disabled={loading}
               >
                 {loading ? (
@@ -418,6 +452,61 @@ const AdminMedicos = () => {
             </div>
           </Form>
         </Modal.Body>
+      </Modal>
+
+      {/* Modal para establecer contraseña */}
+      <Modal show={showPasswordModal} onHide={() => setShowPasswordModal(false)}>
+        <Modal.Header closeButton className="modal-header-primary">
+          <Modal.Title>
+            <i className="bi bi-key me-2"></i>
+            Establecer Contraseña
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedMedicoForPassword && (
+            <Alert variant="info">
+              Estableciendo contraseña para:{" "}
+              <strong>
+                Dr. {selectedMedicoForPassword.medicoNombre} {selectedMedicoForPassword.medicoApellido}
+              </strong>
+            </Alert>
+          )}
+          <Form.Group className="mb-3">
+            <Form.Label>Nueva Contraseña *</Form.Label>
+            <Form.Control
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+              minLength={6}
+            />
+            <Form.Text className="text-muted">
+              Esta contraseña permitirá al médico acceder al Portal del Médico.
+            </Form.Text>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPasswordModal(false)}>
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSetPassword}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Guardando...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-check-circle me-2"></i>
+                Establecer Contraseña
+              </>
+            )}
+          </Button>
+        </Modal.Footer>
       </Modal>
     </Container>
   );

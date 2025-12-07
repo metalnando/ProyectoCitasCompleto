@@ -8,7 +8,7 @@ const NavbarOdonto = () => {
   const location = useLocation();
 
   // Verificar si estamos en el panel de administración
-  const isAdminPanel = location.pathname.startsWith('/admin');
+  // const isAdminPanel = location.pathname.startsWith('/admin');
 
   // Verificar si el usuario es administrador
   const isAdmin = user?.roles?.includes('admin') || user?.role === 'admin';
@@ -21,7 +21,7 @@ const NavbarOdonto = () => {
   return (
     <Navbar
       expand="lg"
-      style={{ backgroundColor: "#48C9B0" }}
+      className="navbar-paciente"
       variant="dark"
       sticky="top"
     >
@@ -31,17 +31,20 @@ const NavbarOdonto = () => {
           to="/"
           className="fw-bold fs-4"
         >
-          🦷 BELA SUNRISE
+          🦷 BELASUNRISE
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">
-              Inicio
-            </Nav.Link>
-
+            {/* Inicio solo para usuarios NO administradores */}
+            {!isAdmin && (
+              <Nav.Link as={Link} to="/">
+                Inicio
+              </Nav.Link>
+            )}
+           
             {/* Opciones para usuarios NO administradores */}
-            {isAuthenticated && !isAdmin && (
+            {/*  {isAuthenticated && !isAdmin && (
               <>
                 <Nav.Link as={Link} to="/agendar-cita">
                   Agendar Cita
@@ -50,10 +53,11 @@ const NavbarOdonto = () => {
                   Mis Citas
                 </Nav.Link>
                 <Nav.Link as={Link} to="/historial">
-                  Mi Historial
+                  Mi Historial Clínico
                 </Nav.Link>
               </>
-            )}
+            )} 
+            */}
 
             {/* Opciones públicas solo para NO administradores */}
             {!isAdmin && (
@@ -64,8 +68,14 @@ const NavbarOdonto = () => {
                 <Nav.Link as={Link} to="/tratamientos">
                   Tratamientos
                 </Nav.Link>
+                <Nav.Link as={Link} to ="/sobre-nosotros">
+                  Sobre Nosotros
+                </Nav.Link>
+                
               </>
             )}
+
+            
 
             {/* Opción de administración solo para administradores */}
             {isAuthenticated && isAdmin && (
@@ -114,7 +124,7 @@ const NavbarOdonto = () => {
                   as={Link}
                   to="/register"
                   variant="light"
-                  style={{ color: "#48C9B0" }}
+                  style={{ color: "var(--primary-odont)" }}
                 >
                   Registrarse
                 </Button>

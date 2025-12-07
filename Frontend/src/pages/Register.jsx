@@ -6,11 +6,13 @@ import { useNavigate, Link } from "react-router-dom";
 const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
+    documento: "",
     email: "",
     password: "",
     confirmPassword: "",
     phone: "",
-    address: ""
+    address: "",
+    fechaNacimiento: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,8 +27,13 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.documento || !formData.email || !formData.password || !formData.confirmPassword || !formData.phone || !formData.address) {
       setError("Por favor, completa todos los campos obligatorios");
+      return false;
+    }
+
+    if (formData.documento.length < 6) {
+      setError("La cédula debe tener al menos 6 caracteres");
       return false;
     }
 
@@ -46,6 +53,11 @@ const Register = () => {
       return false;
     }
 
+    if (formData.phone.length < 7) {
+      setError("Por favor, ingresa un número de teléfono válido");
+      return false;
+    }
+
     return true;
   };
 
@@ -62,12 +74,18 @@ const Register = () => {
     try {
       const userData = {
         nombre: formData.name,
+        documento: formData.documento,
         email: formData.email,
         password: formData.password,
         telefono: formData.phone,
         direccion: formData.address,
         roles: ["user"]
       };
+
+      // Agregar fecha de nacimiento si se proporcionó
+      if (formData.fechaNacimiento) {
+        userData.fechaNacimiento = formData.fechaNacimiento;
+      }
 
       const result = await register(userData);
 
@@ -105,6 +123,32 @@ const Register = () => {
                 placeholder="Ingresa tu nombre completo"
                 required
               />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="documento">
+              <Form.Label>Cédula / Documento de Identidad *</Form.Label>
+              <Form.Control
+                type="text"
+                name="documento"
+                value={formData.documento}
+                onChange={handleChange}
+                placeholder="Ingresa tu número de cédula"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="fechaNacimiento">
+              <Form.Label>Fecha de Nacimiento</Form.Label>
+              <Form.Control
+                type="date"
+                name="fechaNacimiento"
+                value={formData.fechaNacimiento}
+                onChange={handleChange}
+                max={new Date().toISOString().split('T')[0]}
+              />
+              <Form.Text className="text-muted">
+                Opcional - Ayuda a calcular tu edad para el historial médico
+              </Form.Text>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="email">
@@ -146,31 +190,33 @@ const Register = () => {
             </Row>
 
             <Form.Group className="mb-3" controlId="phone">
-              <Form.Label>Teléfono (Opcional)</Form.Label>
+              <Form.Label>Teléfono *</Form.Label>
               <Form.Control
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Ej: 3001234567"
+                required
               />
             </Form.Group>
 
             <Form.Group className="mb-4" controlId="address">
-              <Form.Label>Dirección (Opcional)</Form.Label>
+              <Form.Label>Dirección *</Form.Label>
               <Form.Control
                 type="text"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Ingresa tu dirección"
+                placeholder="Ingresa tu dirección completa"
+                required
               />
             </Form.Group>
 
             <Button
               className="w-100 mb-3"
+              variant="primary"
               type="submit"
-              style={{ backgroundColor: "#48C9B0", border: "none" }}
               disabled={loading}
             >
               {loading ? (
@@ -193,7 +239,7 @@ const Register = () => {
             <div className="text-center">
               <p className="mb-0">
                 ¿Ya tienes una cuenta?{" "}
-                <Link to="/login" style={{ color: "#48C9B0", textDecoration: "none" }}>
+                <Link to="/login" className="text-primary-odont" style={{ textDecoration: "none" }}>
                   Inicia Sesión
                 </Link>
               </p>

@@ -7,17 +7,22 @@ const bcrypt = bcryptModule;
 
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { IUsuarios } from './schema/usuarios.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectModel('User') private readonly usuarioModel: Model<IUsuarios>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
-  /** Buscar usuario por email */
+  /** Buscar usuario por email (case-insensitive) */
   async findByEmail(email: string): Promise<IUsuarios | null> {
-    return await this.usuarioModel.findOne({ email }).exec();
+    // Convertir el email a minúsculas para búsqueda case-insensitive
+    return await this.usuarioModel.findOne({
+      email: { $regex: new RegExp(`^${email}$`, 'i') }
+    }).exec();
   }
 
   /** Buscar usuario por ID */
@@ -31,6 +36,9 @@ export class UsuariosService {
       nombre: createUsuarioDto.nombre,
       email: createUsuarioDto.email,
       password: createUsuarioDto.password,
+      documento: createUsuarioDto.documento,
+      telefono: createUsuarioDto.telefono,
+      direccion: createUsuarioDto.direccion,
       roles: createUsuarioDto.roles || ['user'],
     });
 
@@ -45,19 +53,33 @@ export class UsuariosService {
         10
       );
     }
-    return this.create(createUsuarioDto);
+    const nuevoUsuario = await this.create(createUsuarioDto);
+
+    // Enviar notificaciones de bienvenida (email y SMS)
+    try {
+      await this.notificationsService.notificarRegistroUsuario(
+        nuevoUsuario.nombre,
+        nuevoUsuario.email,
+        nuevoUsuario.telefono,
+      );
+    } catch (error) {
+      console.error('Error al enviar notificaciones de registro:', error);
+      // No lanzar el error para que el registro se complete aunque falle la notificación
+    }
+
+    return nuevoUsuario;
   }
 
   /** Login: genera tokens */
   async loginUser(email: string, password: string) {
     const user = await this.findByEmail(email);
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new Error('El correo electrónico ingresado no está registrado');
     }
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      throw new Error('Contraseña inválida');
+      throw new Error('La contraseña ingresada es incorrecta');
     }
 
     const accessToken = this.jwtService.sign({

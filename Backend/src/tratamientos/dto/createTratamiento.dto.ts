@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsArray,
 } from 'class-validator';
 
 export class createTratamientoDto {
@@ -34,4 +35,8 @@ export class createTratamientoDto {
   @IsString()
   @IsOptional()
   estado?: string;
+
+  @IsArray()
+  @IsOptional()
+  medicos?: string[];
 }

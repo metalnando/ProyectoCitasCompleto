@@ -23,11 +23,11 @@ export class TratamientoService {
 
   async findAll(activo?: boolean): Promise<ITratamiento[]> {
     const query = activo !== undefined ? { activo } : {};
-    return this.tratamientoModel.find().exec();
+    return this.tratamientoModel.find().populate('medicos').exec();
   }
 
   async findOne(id: string): Promise<ITratamiento> {
-    const tratamiento = await this.tratamientoModel.findById(id).exec();
+    const tratamiento = await this.tratamientoModel.findById(id).populate('medicos').exec();
     if (!tratamiento) {
       throw new Error(`Tratamiento con ID ${id} no encontrado`);
     }

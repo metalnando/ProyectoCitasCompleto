@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Card, Row, Col, Button, Badge } from "react-bootstrap";
+import { Card, Row, Col, Button, Badge, Spinner } from "react-bootstrap";
 import "./CalendarioCitas.css";
 
-const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOcupadas = [] }) => {
+const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOcupadas = [], loadingHoras = false }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Horas disponibles para citas (de 8am a 6pm)
@@ -79,11 +79,12 @@ const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOc
 
   const isSelectedDate = (day) => {
     if (!selectedDate) return false;
-    const selected = new Date(selectedDate);
+    // Parsear la fecha manualmente para evitar problemas de zona horaria
+    const [year, month, dayOfMonth] = selectedDate.split('-').map(Number);
     return (
-      day === selected.getDate() &&
-      currentMonth.getMonth() === selected.getMonth() &&
-      currentMonth.getFullYear() === selected.getFullYear()
+      day === dayOfMonth &&
+      currentMonth.getMonth() === month - 1 &&
+      currentMonth.getFullYear() === year
     );
   };
 
@@ -119,7 +120,7 @@ const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOc
 
   return (
     <Card className="shadow-lg mb-4">
-      <Card.Header style={{ backgroundColor: "#48C9B0" }} className="text-white">
+      <Card.Header className="card-header-primary">
         <h5 className="mb-0">
           <i className="bi bi-calendar3 me-2"></i>
           Selecciona Fecha y Hora
@@ -184,6 +185,11 @@ const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOc
                   <i className="bi bi-calendar-x" style={{ fontSize: "2rem" }}></i>
                   <p className="mt-2">Primero selecciona una fecha</p>
                 </div>
+              ) : loadingHoras ? (
+                <div className="text-center text-muted py-4">
+                  <Spinner animation="border" className="text-primary" />
+                  <p className="mt-2">Cargando disponibilidad...</p>
+                </div>
               ) : horasLibres.length === 0 ? (
                 <div className="text-center text-muted py-4">
                   <i className="bi bi-x-circle" style={{ fontSize: "2rem", color: "#e74c3c" }}></i>
@@ -198,10 +204,6 @@ const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOc
                       size="sm"
                       onClick={() => handleHourClick(hora)}
                       className="hour-button"
-                      style={selectedHour === hora ? {
-                        backgroundColor: "#48C9B0",
-                        borderColor: "#48C9B0"
-                      } : {}}
                     >
                       {hora}
                     </Button>
@@ -210,18 +212,22 @@ const CalendarioCitas = ({ onSelectDateTime, selectedDate, selectedHour, horasOc
               )}
 
               {selectedDate && selectedHour && (
-                <div className="mt-3 p-3" style={{ backgroundColor: "#e8f5f3", borderRadius: "8px" }}>
+                <div className="mt-3 p-3 bg-info-light" style={{ borderRadius: "8px" }}>
                   <h6 className="mb-2">
                     <i className="bi bi-check-circle text-success me-2"></i>
                     Cita Seleccionada:
                   </h6>
                   <p className="mb-1">
-                    <strong>Fecha:</strong> {new Date(selectedDate).toLocaleDateString('es-ES', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                    <strong>Fecha:</strong> {(() => {
+                      const [year, month, day] = selectedDate.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      });
+                    })()}
                   </p>
                   <p className="mb-0">
                     <strong>Hora:</strong> {selectedHour}

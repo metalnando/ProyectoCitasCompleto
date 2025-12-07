@@ -30,13 +30,25 @@ export const API_ENDPOINTS = {
   // Tratamientos
   TRATAMIENTOS: `${API_BASE_URL}/tratamientos`,
 
+  // Historia Clínica
+  HISTORIA_CLINICA: `${API_BASE_URL}/historia-clinica`,
+  HISTORIA_BY_PACIENTE: (pacienteId) => `${API_BASE_URL}/historia-clinica/paciente/${pacienteId}`,
+  HISTORIA_BY_MEDICO: (medicoId) => `${API_BASE_URL}/historia-clinica/medico/${medicoId}`,
+  HISTORIA_BY_CITA: (citaId) => `${API_BASE_URL}/historia-clinica/cita/${citaId}`,
+
+  // Login Médico
+  MEDICO_LOGIN: `${API_BASE_URL}/medico/login`,
+
   // Base URL para construcción dinámica
   BASE_URL: API_BASE_URL,
 };
 
 // Helper para obtener el token del localStorage
 export const getAuthToken = () => {
-  return localStorage.getItem('token');
+  // Primero intentar obtener token de médico, luego de usuario
+  const medicoToken = localStorage.getItem('medicoToken');
+  const userToken = localStorage.getItem('token');
+  return medicoToken || userToken;
 };
 
 // Helper para obtener headers con autenticación

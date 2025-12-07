@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
 
 export class createMedicoDto {
   @IsString()
@@ -25,4 +25,12 @@ export class createMedicoDto {
   @IsString()
   @IsOptional()
   imagen?: string;
+
+  @IsString()
+  @IsOptional()
+  password?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  activo?: boolean;
 }

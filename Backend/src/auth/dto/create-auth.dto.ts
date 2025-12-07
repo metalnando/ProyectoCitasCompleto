@@ -1,9 +1,9 @@
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsArray, IsDateString } from 'class-validator';
 
 export class CreateAuthDto {
   @IsString()
   @MinLength(2)
-  name: string;
+  nombre: string;
 
   @IsEmail()
   email: string;
@@ -12,15 +12,21 @@ export class CreateAuthDto {
   @MinLength(6)
   password: string;
 
-  @IsOptional()
   @IsString()
-  role?: string;
+  @MinLength(6)
+  documento: string;
+
+  @IsString()
+  telefono: string;
+
+  @IsString()
+  direccion: string;
 
   @IsOptional()
-  @IsString()
-  phone?: string;
+  @IsDateString()
+  fechaNacimiento?: Date;
 
   @IsOptional()
-  @IsString()
-  address?: string;
+  @IsArray()
+  roles?: string[];
 }

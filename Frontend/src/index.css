@@ -7,9 +7,9 @@
 }
 
 body {
-  font-family: 'Roboto', sans-serif; 
-  background-color: #f8f9fa; 
-  color: #333;
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-dark-odont);
   line-height: 1.6;
 }
 
@@ -26,15 +26,51 @@ main {
 
 
 :root {
-  --primary-odont: #48C9B0; 
-  --secondary-odont: #2e8b57; 
+  /* Primary palette - Azul Serenity */
+  --primary-odont: #6BA8D8;
+  --primary-hover: #5291C4;
+  --primary-light: #A5C9E6;
+  --primary-extra-light: #E8F3F9;
+
+  /* Secondary palette - Lavanda Suave */
+  --secondary-odont: #9B89C8;
+  --secondary-hover: #8475B3;
+  --secondary-light: #C4B9E0;
+  --secondary-extra-light: #F0EDF7;
+
+  /* Background colors - Blanco Hueso */
+  --bg-primary: #FDFCFA;
+  --bg-light: #F5F5F3;
+  --bg-card: #FFFFFF;
+  --bg-light-green-odont: #E8F3F9;
+
+  /* Text colors - Gris Pizarra */
+  --text-dark-odont: #3A4551;
+  --text-medium: #6B7785;
+  --text-light: #8B95A1;
   --light-gray-odont: #e9ecef;
-  --text-dark-odont: #212529;
-  --danger-odont: #dc3545;
-  --info-odont: #17a2b8;
-  --success-odont: #28a745;
-  --warning-odont: #ffc107;
-  --bg-light-green: #f2fcfb; 
+
+  /* Semantic colors - WCAG AA Compliant */
+  --success-odont: #7BC4A4;
+  --success-hover: #66AD8F;
+  --info-odont: #6BA8D8;
+  --warning-odont: #F4B860;
+  --warning-hover: #E5A64D;
+  --danger-odont: #E08787;
+  --danger-hover: #D47373;
+
+  /* Navbar role colors */
+  --navbar-paciente: #6BA8D8;
+  --navbar-admin: #7B87A0;
+  --navbar-medico: #8B93B8;
+
+  /* Calendar colors */
+  --calendar-today: #6BA8D8;
+  --calendar-selected: #6BA8D8;
+  --calendar-hover: #E8F3F9;
+
+  /* Legacy compatibility */
+  --bg-light-green: #E8F3F9;
 }
 
 .text-primary-odont { color: var(--primary-odont) !important; }
@@ -50,8 +86,8 @@ main {
 }
 
 .btn-primary:hover {
-  background-color: var(--secondary-odont) !important;
-  border-color: var(--secondary-odont) !important;
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
@@ -151,7 +187,7 @@ main {
 
 .form-control:focus {
   border-color: var(--primary-odont);
-  box-shadow: 0 0 0 0.25rem rgba(72, 201, 176, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(107, 168, 216, 0.25);
   outline: none;
 }
 
@@ -182,29 +218,77 @@ main {
 }
 
 
+/* Hero Carousel Styles */
+.hero-carousel {
+  margin: 0;
+  padding: 0;
+}
+
+.hero-carousel .carousel-indicators {
+  bottom: 20px;
+}
+
+.hero-carousel .carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.hero-carousel .carousel-indicators .active {
+  background-color: var(--primary-odont);
+  border-color: white;
+}
+
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.hero-carousel .carousel-control-prev:hover,
+.hero-carousel .carousel-control-next:hover {
+  opacity: 1;
+}
+
 .hero-image-container {
   position: relative;
   width: 100%;
-  height: 450px; 
+  height: 500px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: white;
-  background-color: var(--primary-odont); 
+  background-color: var(--primary-odont);
 }
 
 .hero-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(60%); 
-  transition: filter 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .hero-image-container:hover .hero-image {
-    filter: brightness(70%); 
+  transform: scale(1.05);
+}
+
+/* Dark overlay for better text readability */
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  z-index: 1;
 }
 
 .hero-text {
@@ -212,20 +296,39 @@ main {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
-  text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  z-index: 2;
+  max-width: 90%;
+  text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.8);
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .hero-text h1 {
-    font-size: 3.8rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    line-height: 1.1;
+  font-size: 3.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  color: white;
+  text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.9);
 }
 
 .hero-text p {
-    font-size: 1.4rem;
-    font-weight: 300;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* WhatsApp Button */
@@ -265,6 +368,152 @@ main {
 .bg-info { background-color: var(--info-odont) !important; }
 .bg-warning { background-color: var(--warning-odont) !important; }
 .bg-danger { background-color: var(--danger-odont) !important; }
+
+/* Reusable component classes */
+.card-header-primary {
+  background-color: var(--primary-odont) !important;
+  color: white !important;
+}
+
+.card-header-secondary {
+  background-color: var(--secondary-odont) !important;
+  color: white !important;
+}
+
+.modal-header-primary {
+  background-color: var(--primary-odont) !important;
+  color: white !important;
+}
+
+.navbar-paciente {
+  background-color: var(--navbar-paciente) !important;
+}
+
+.navbar-admin {
+  background-color: var(--navbar-admin) !important;
+}
+
+.navbar-medico {
+  background-color: var(--navbar-medico) !important;
+}
+
+.btn-whatsapp {
+  background-color: var(--primary-odont);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.btn-whatsapp:hover {
+  background-color: var(--primary-hover);
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.bg-info-light {
+  background-color: var(--primary-extra-light) !important;
+}
+
+.bg-secondary-light {
+  background-color: var(--secondary-extra-light) !important;
+}
+
+/* Improved text classes */
+.text-muted {
+  color: var(--text-medium) !important;
+}
+
+.text-dark {
+  color: var(--text-dark-odont) !important;
+}
+
+/* Link colors */
+a {
+  color: var(--primary-odont);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* Focus indicators for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--primary-odont);
+  outline-offset: 2px;
+}
+
+/* Bootstrap button overrides */
+.btn-success {
+  background-color: var(--success-odont) !important;
+  border-color: var(--success-odont) !important;
+}
+
+.btn-success:hover {
+  background-color: var(--success-hover) !important;
+  border-color: var(--success-hover) !important;
+}
+
+.btn-info {
+  background-color: var(--info-odont) !important;
+  border-color: var(--info-odont) !important;
+}
+
+.btn-warning {
+  background-color: var(--warning-odont) !important;
+  border-color: var(--warning-odont) !important;
+  color: var(--text-dark-odont) !important;
+}
+
+.btn-warning:hover {
+  background-color: var(--warning-hover) !important;
+  color: var(--text-dark-odont) !important;
+}
+
+.btn-danger {
+  background-color: var(--danger-odont) !important;
+  border-color: var(--danger-odont) !important;
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-hover) !important;
+}
+
+/* Badge overrides */
+.badge.bg-warning {
+  background-color: var(--warning-odont) !important;
+  color: var(--text-dark-odont) !important;
+}
+
+.badge.bg-info {
+  background-color: var(--info-odont) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--success-odont) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--danger-odont) !important;
+}
+
+/* Alert overrides */
+.alert-info {
+  background-color: var(--primary-extra-light) !important;
+  border-color: var(--primary-light) !important;
+  color: var(--text-dark-odont) !important;
+}
+
+.alert-success {
+  background-color: #E8F5F0 !important;
+  border-color: var(--success-odont) !important;
+  color: var(--text-dark-odont) !important;
+}
 
 @media (max-width: 992px) {
     .hero-text h1 {

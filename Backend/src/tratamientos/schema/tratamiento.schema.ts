@@ -7,6 +7,7 @@ export const tratamientoSchema = new mongoose.Schema({
   duracion: { type: Number, required: true },
   imagen: { type: String, required: false },
   estado: { type: String, default: 'activo' },
+  medicos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Medicos' }],
 });
 
 export interface ITratamiento extends mongoose.Document {
@@ -17,6 +18,7 @@ export interface ITratamiento extends mongoose.Document {
   duracion: number;
   imagen?: string;
   estado?: string;
+  medicos?: mongoose.Types.ObjectId[];
 }
 
 export const TratamientoModel = {

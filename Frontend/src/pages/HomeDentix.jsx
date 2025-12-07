@@ -1,9 +1,31 @@
-import React from "react";
-import { Container, Button, Row, Col } from "react-bootstrap";
+import React, { useEffect } from "react";
+import { Container, Button, Row, Col, Carousel } from "react-bootstrap";
 import CardOdonto from "../components/CardOdonto";
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
+import Testimonios from "../components/Testimonios";
+import { useAuth } from "../context/AuthContext";
 
 const HomeDentix = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirigir administradores al panel de administración
+  useEffect(() => {
+    if (user) {
+      const isAdmin = user?.roles?.includes('admin') || user?.role === 'admin';
+      if (isAdmin) {
+        navigate("/admin");
+      }
+    }
+  }, [user, navigate]);
+
+  const scrollToTestimonios = () => {
+    const element = document.getElementById("testimonios-section");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const cardsData = [
     {
       title: "Agendar Cita",
@@ -23,13 +45,13 @@ const HomeDentix = () => {
       img: "/Especialistas.png", 
       link: "/especialistas", 
     },
-    // {
-    //   title: "Reprogramar Cita",
-    //   description: "Modifica o cancela tu cita fácilmente desde aquí.",
-    //   img: "/Reprogramacion.png", 
+     {
+       title: "Mis Citas",
+       description: "Consulta tus citas fácilmente desde aquí.",
+       img: "/Reprogramacion.png", 
   
-    //   onClick: () => alert("FPENDIENTE")
-    // },
+       link: "/mis-Citas",
+     },
     {
       title: "Tratamientos y Procesos",
       description: "Descubre los procedimientos que ofrecemos para tu salud oral.",
@@ -39,8 +61,8 @@ const HomeDentix = () => {
     {
       title: "Pagos y Facturación",
       description: "Consulta y realiza tus pagos de manera segura.",
-      img: "/pagos.png", 
-      onClick: () => alert("PENDIENTE")
+      img: "/pagos.png",
+      link: "/pagos"
     },
     // {
     //   title: "Contacto Directo",
@@ -52,26 +74,65 @@ const HomeDentix = () => {
       title: "Testimonios de pacientes",
       description: "Lee las experiencias de otros pacientes con nuestros servicios.",
       img: "/testimonios.jpg",
-      onClick: () => alert("PENDIENTE")
+      onClick: scrollToTestimonios
     }
   ];
 
   return (
     <>
       
-      <div className="hero-image-container">
-        <img
-          src="/Home.png" 
-          alt="Banner odontológico Bela Sunrise"
-          className="img-fluid hero-image"
-        />
-        <div className="hero-text">
-          <h1 className="display-4 fw-bold text-white">Bela Sunrise</h1>
-          <p className="lead text-white-50">
-            Tu sonrisa, nuestra prioridad. Te ofrecemos el mejor servicio y atención.
-          </p>
-        </div>
-      </div>
+      <Carousel fade interval={4000} className="hero-carousel">
+        <Carousel.Item>
+          <div className="hero-image-container">
+            <img
+              src="/Home.png"
+              alt="Banner odontológico BelaSunrise"
+              className="hero-image"
+            />
+            <div className="hero-overlay"></div>
+            <div className="hero-text">
+              <h1 className="display-4 fw-bold text-white">Bela Sunrise</h1>
+              <p className="lead text-white">
+                Tu sonrisa, nuestra prioridad. Te ofrecemos el mejor servicio y atención.
+              </p>
+            </div>
+          </div>
+        </Carousel.Item>
+
+        <Carousel.Item>
+          <div className="hero-image-container">
+            <img
+              src="/Banner2.jpg"
+              alt="Servicios dentales profesionales"
+              className="hero-image"
+            />
+            <div className="hero-overlay"></div>
+            <div className="hero-text">
+              <h1 className="display-4 fw-bold text-white">Servicios Profesionales</h1>
+              <p className="lead text-white">
+                Tecnología de punta y especialistas certificados para tu salud dental.
+              </p>
+            </div>
+          </div>
+        </Carousel.Item>
+
+        <Carousel.Item>
+          <div className="hero-image-container">
+            <img
+              src="/Banner3.jpg"
+              alt="Atención personalizada"
+              className="hero-image"
+            />
+            <div className="hero-overlay"></div>
+            <div className="hero-text">
+              <h1 className="display-4 fw-bold text-white">Atención Personalizada</h1>
+              <p className="lead text-white">
+                Cuidamos cada detalle para brindarte la mejor experiencia dental.
+              </p>
+            </div>
+          </div>
+        </Carousel.Item>
+      </Carousel>
 
       
       <Container className="text-center mt-5 mb-5">
@@ -82,12 +143,17 @@ const HomeDentix = () => {
         </p>
       </Container>
 
-      
+
       <Container className="mt-5 mb-5">
         <CardOdonto cardsData={cardsData} />
       </Container>
 
-      
+      {/* Sección de Testimonios */}
+      <div id="testimonios-section">
+        <Testimonios />
+      </div>
+
+
       <Container className="text-center my-5">
         <h3 className="mb-4 fw-bold text-secondary-odont">
           ¿Listo para transformar tu sonrisa?
@@ -96,16 +162,7 @@ const HomeDentix = () => {
           href="https://wa.me/3217759280"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            backgroundColor: "#48C9B0",
-            color: "white",
-            border: "none",
-            padding: "12px 30px",
-            fontSize: "1.2rem",
-            borderRadius: "50px", 
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          }}
-          className="d-inline-flex align-items-center justify-content-center gap-2 whatsapp-button-hover"
+          className="btn-whatsapp d-inline-flex align-items-center justify-content-center gap-2"
         >
           <i className="bi bi-whatsapp fs-4"></i> Agenda tu cita por WhatsApp
         </Button>

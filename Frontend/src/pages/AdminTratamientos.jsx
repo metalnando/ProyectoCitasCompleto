@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Container, Card, Table, Button, Modal, Form, Alert, Spinner } from "react-bootstrap";
+import { Container, Card, Table, Button, Modal, Form, Alert, Spinner, Badge } from "react-bootstrap";
 import tratamientosService from "../services/tratamientosService";
+import medicosService from "../services/medicosService";
 
 const AdminTratamientos = () => {
   const [tratamientos, setTratamientos] = useState([]);
+  const [medicos, setMedicos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingTratamiento, setEditingTratamiento] = useState(null);
@@ -16,11 +18,20 @@ const AdminTratamientos = () => {
     precio: "",
     duracion: "",
     imagen: "",
+    medicos: [],
   });
 
   useEffect(() => {
     cargarTratamientos();
+    cargarMedicos();
   }, []);
+
+  const cargarMedicos = async () => {
+    const result = await medicosService.obtenerMedicos();
+    if (result.success) {
+      setMedicos(result.data);
+    }
+  };
 
   const cargarTratamientos = async () => {
     const result = await tratamientosService.obtenerTratamientos();
@@ -40,6 +51,7 @@ const AdminTratamientos = () => {
         precio: tratamiento.precio || "",
         duracion: tratamiento.duracion || "",
         imagen: tratamiento.imagen || "",
+        medicos: tratamiento.medicos?.map(m => m._id || m) || [],
       });
     } else {
       setEditingTratamiento(null);
@@ -49,6 +61,7 @@ const AdminTratamientos = () => {
         precio: "",
         duracion: "",
         imagen: "",
+        medicos: [],
       });
     }
     setShowModal(true);
@@ -67,6 +80,14 @@ const AdminTratamientos = () => {
     });
   };
 
+  const handleMedicosChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData({
+      ...formData,
+      medicos: selectedOptions
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -79,6 +100,7 @@ const AdminTratamientos = () => {
         precio: parseFloat(formData.precio),
         duracion: formData.duracion ? parseInt(formData.duracion) : undefined,
         imagen: formData.imagen || undefined,
+        medicos: formData.medicos,
       };
 
       let result;
@@ -119,11 +141,11 @@ const AdminTratamientos = () => {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold" style={{ color: "#48C9B0" }}>
+        <h2 className="fw-bold text-primary-odont">
           Administrar Tratamientos/Procedimientos
         </h2>
         <Button
-          style={{ backgroundColor: "#48C9B0", border: "none" }}
+          variant="primary"
           onClick={() => handleShowModal()}
         >
           <i className="bi bi-plus-circle me-2"></i>
@@ -137,19 +159,20 @@ const AdminTratamientos = () => {
       <Card className="shadow-lg">
         <Card.Body>
           <Table responsive hover>
-            <thead style={{ backgroundColor: "#48C9B0", color: "white" }}>
+            <thead className="card-header-primary">
               <tr>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Costo</th>
                 <th>Duración (min)</th>
+                <th>Médicos Asignados</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {tratamientos.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-4">
+                  <td colSpan="6" className="text-center py-4">
                     <i className="bi bi-inbox" style={{ fontSize: "2rem", color: "#ccc" }}></i>
                     <p className="mt-2 text-muted">No hay tratamientos registrados</p>
                   </td>
@@ -164,11 +187,29 @@ const AdminTratamientos = () => {
                     </td>
                     <td>{tratamiento.duracion ? `${tratamiento.duracion} min` : "-"}</td>
                     <td>
+                      {tratamiento.medicos && tratamiento.medicos.length > 0 ? (
+                        <div>
+                          {tratamiento.medicos.map((medico) => (
+                            <Badge
+                              key={medico._id || medico}
+                              bg="info"
+                              className="me-1 mb-1"
+                            >
+                              Dr. {medico.medicoNombre} {medico.medicoApellido}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted">Sin asignar</span>
+                      )}
+                    </td>
+                    <td>
                       <Button
                         variant="warning"
                         size="sm"
                         className="me-2"
                         onClick={() => handleShowModal(tratamiento)}
+                        title="Editar tratamiento"
                       >
                         <i className="bi bi-pencil"></i>
                       </Button>
@@ -176,6 +217,7 @@ const AdminTratamientos = () => {
                         variant="danger"
                         size="sm"
                         onClick={() => handleEliminar(tratamiento._id)}
+                        title="Eliminar tratamiento"
                       >
                         <i className="bi bi-trash"></i>
                       </Button>
@@ -190,7 +232,7 @@ const AdminTratamientos = () => {
 
       {/* Modal para crear/editar tratamiento */}
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton style={{ backgroundColor: "#48C9B0", color: "white" }}>
+        <Modal.Header closeButton className="modal-header-primary">
           <Modal.Title>
             {editingTratamiento ? "Editar Tratamiento" : "Nuevo Tratamiento"}
           </Modal.Title>
@@ -273,13 +315,44 @@ const AdminTratamientos = () => {
               </div>
             </div>
 
+            <Form.Group className="mb-3">
+              <Form.Label>
+                <i className="bi bi-person-badge me-2"></i>
+                Médicos Especialistas Asignados
+              </Form.Label>
+              <Form.Select
+                multiple
+                value={formData.medicos}
+                onChange={handleMedicosChange}
+                style={{ height: "150px" }}
+              >
+                {medicos.map((medico) => (
+                  <option key={medico._id} value={medico._id}>
+                    Dr. {medico.medicoNombre} {medico.medicoApellido} - {medico.especialidad}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-muted">
+                Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples médicos.
+                Los médicos asignados podrán atender citas de este tratamiento.
+              </Form.Text>
+              {formData.medicos.length > 0 && (
+                <div className="mt-2">
+                  <small className="text-success">
+                    <i className="bi bi-check-circle me-1"></i>
+                    {formData.medicos.length} médico(s) seleccionado(s)
+                  </small>
+                </div>
+              )}
+            </Form.Group>
+
             <div className="d-flex justify-content-end gap-2">
               <Button variant="secondary" onClick={handleCloseModal}>
                 Cancelar
               </Button>
               <Button
                 type="submit"
-                style={{ backgroundColor: "#48C9B0", border: "none" }}
+                variant="primary"
                 disabled={loading}
               >
                 {loading ? (
