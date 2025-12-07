@@ -178,6 +178,32 @@ class MedicosService {
       };
     }
   }
+
+  /**
+   * Establecer contraseña para médico
+   */
+  async establecerPassword(id, password) {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MEDICOS}/${id}/password`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al establecer contraseña');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Error de conexión con el servidor'
+      };
+    }
+  }
 }
 
 export default new MedicosService();

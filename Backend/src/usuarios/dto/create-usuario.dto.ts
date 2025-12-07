@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsString()
@@ -24,6 +24,10 @@ export class CreateUsuarioDto {
   @IsOptional()
   @IsString()
   direccion?: string;
+
+  @IsOptional()
+  @IsDateString()
+  fechaNacimiento?: Date;
 
   @IsOptional()
   roles?: string[];

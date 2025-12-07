@@ -69,6 +69,11 @@ export class CitasController {
     return this.citasService.getCitasByEstado(estado);
   }
 
+  @Get('usuario/:userId')
+  async getCitasByUsuario(@Param('userId') userId: string) {
+    return this.citasService.getCitasByUsuario(userId);
+  }
+
   @Put(':id/estado')
   async updateEstadoCita(
     @Param('id') id: string,
@@ -94,6 +99,15 @@ export class CitasController {
     @Body() crearCitaDto: CrearCitaDto
   ): Promise<ICitas> {
     return await this.citasService.updateCita(id, crearCitaDto);
+  }
+
+  // Actualización parcial de cita (para duración, consultorio, etc.)
+  @Put(':id/parcial')
+  async actualizarCitaParcial(
+    @Param('id') id: string,
+    @Body() updateData: Partial<CrearCitaDto>
+  ): Promise<ICitas> {
+    return await this.citasService.updateCitaParcial(id, updateData);
   }
 
   //Eliminar cita (eliminación lógica)

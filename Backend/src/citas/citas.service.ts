@@ -10,12 +10,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { CrearCitaDto } from './dto/crear-cita.dto';
 import { IPaciente } from 'src/pacientes/schemas/pacientes.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { IUsuarios } from 'src/usuarios/schema/usuarios.schema';
 
 @Injectable()
 export class CitasService {
   constructor(
     @InjectModel(citasModel.name) private readonly citasModel: Model<ICitas>,
-    @InjectModel('Paciente') private readonly pacienteModel: Model<IPaciente>
+    @InjectModel('Paciente') private readonly pacienteModel: Model<IPaciente>,
+    @InjectModel('User') private readonly usuarioModel: Model<IUsuarios>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async crearCita(crearCitaDto: CrearCitaDto & { paciente: Types.ObjectId }) {
@@ -38,6 +42,39 @@ export class CitasService {
     try {
       const savedCita = await this.citasModel.create(nuevaCita);
       console.log('Cita guardada:', savedCita);
+
+      // Enviar notificaciones de cita agendada (email y SMS)
+      try {
+        const nombrePaciente = `${paciente.pacienteNombre} ${paciente.pacienteApellido}`;
+
+        // Intentar encontrar el email del usuario asociado al paciente
+        const usuario = await this.usuarioModel.findOne({
+          nombre: { $regex: new RegExp(paciente.pacienteNombre, 'i') }
+        }).exec();
+
+        const emailPaciente = usuario?.email || `${paciente.pacienteDocumento}@temporal.com`;
+
+        console.log(`📞 Enviando notificaciones a: ${nombrePaciente}`);
+        console.log(`   Email: ${emailPaciente}`);
+        console.log(`   Teléfono: ${paciente.pacienteTelefono}`);
+
+        await this.notificationsService.notificarCitaAgendada(
+          nombrePaciente,
+          emailPaciente,
+          paciente.pacienteTelefono,
+          crearCitaDto.fecha.toString(),
+          crearCitaDto.hora,
+          crearCitaDto.motivo,
+        );
+
+        console.log('✅ Notificaciones de cita enviadas exitosamente');
+      } catch (notifError) {
+        console.error('❌ Error al enviar notificaciones de cita:', notifError.message);
+        console.error('⚠️  La cita se creó correctamente, pero no se pudo enviar la notificación.');
+        console.error('   Verifica que el número de teléfono del paciente tenga formato válido: +57XXXXXXXXXX (10 dígitos)');
+        // No lanzar el error para que la cita se cree aunque falle la notificación
+      }
+
       return savedCita;
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -53,7 +90,10 @@ export class CitasService {
 
     return await this.citasModel
       .find({ paciente: new Types.ObjectId(pacienteId) })
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio')
       .sort({ fecha: -1, hora: -1 })
@@ -77,7 +117,10 @@ export class CitasService {
 
     return await this.citasModel
       .find(query)
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio')
       .sort({ fecha: 1, hora: 1 })
@@ -88,10 +131,46 @@ export class CitasService {
   async getCitasByEstado(estado: string): Promise<ICitas[]> {
     return await this.citasModel
       .find({ estado })
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio')
       .exec();
+  }
+
+  // Obtener citas por usuario (busca el paciente asociado al usuario)
+  async getCitasByUsuario(userId: string): Promise<ICitas[]> {
+    // Primero necesitamos obtener el usuario para conocer su documento
+    // Luego buscar el paciente con ese documento
+    // Finalmente obtener las citas de ese paciente
+
+    try {
+      // Buscar todos los pacientes y filtrar por las citas
+      // Como no tenemos relación directa usuario-paciente, buscamos todas las citas
+      // y el frontend filtrará según el usuario
+
+      // Opción: buscar citas donde el documento del paciente coincida con el del usuario
+      const citas = await this.citasModel
+        .find()
+        .populate(
+          'paciente',
+          'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+        )
+        .populate('medico', 'medicoNombre medicoApellido especialidad')
+        .populate('tratamiento', 'nombre precio')
+        .sort({ fecha: -1, hora: -1 })
+        .exec();
+
+      return citas;
+    } catch (error) {
+      console.error('Error al obtener citas por usuario:', error);
+      throw new HttpException(
+        'Error al obtener las citas del usuario',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   // Actualizar estado de cita
@@ -106,7 +185,10 @@ export class CitasService {
         { estado, fechaActualizacion: new Date() },
         { new: true }
       )
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio');
 
@@ -121,7 +203,10 @@ export class CitasService {
   async getCitas(): Promise<ICitas[]> {
     return await this.citasModel
       .find()
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio')
       .exec();
@@ -134,8 +219,14 @@ export class CitasService {
 
     const cita = await this.citasModel
       .findById(id)
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono pacienteDireccion')
-      .populate('medico', 'medicoNombre medicoApellido especialidad medicoTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono pacienteDireccion'
+      )
+      .populate(
+        'medico',
+        'medicoNombre medicoApellido especialidad medicoTelefono'
+      )
       .populate('tratamiento', 'nombre precio')
       .exec();
 
@@ -159,7 +250,40 @@ export class CitasService {
         { ...crearCitaDto, fechaActualizacion: new Date() },
         { new: true }
       )
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
+      .populate('medico', 'medicoNombre medicoApellido especialidad')
+      .populate('tratamiento', 'nombre precio');
+
+    if (!citaActualizada) {
+      throw new NotFoundException(
+        `El id ${id} no se encuentra en la base de datos`
+      );
+    }
+    return citaActualizada;
+  }
+
+  // Actualización parcial de cita (solo campos específicos)
+  async updateCitaParcial(
+    id: string,
+    updateData: Partial<CrearCitaDto>
+  ): Promise<ICitas> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Id de la cita no es válido');
+    }
+
+    const citaActualizada = await this.citasModel
+      .findByIdAndUpdate(
+        id,
+        { ...updateData, fechaActualizacion: new Date() },
+        { new: true }
+      )
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio');
 
@@ -211,25 +335,29 @@ export class CitasService {
   async registrarPago(
     id: string,
     metodoPago: string,
-    comprobantePago?: string,
+    comprobantePago?: string
   ): Promise<ICitas> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new NotFoundException('Id de la cita no es válido');
     }
 
-    const citaPagada = await this.citasModel.findByIdAndUpdate(
-      id,
-      {
-        estadoPago: 'pagada',
-        fechaPago: new Date(),
-        metodoPago,
-        comprobantePago,
-        habilitada: true,
-        fechaActualizacion: new Date(),
-      },
-      { new: true }
-    )
-      .populate('paciente', 'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono')
+    const citaPagada = await this.citasModel
+      .findByIdAndUpdate(
+        id,
+        {
+          estadoPago: 'pagada',
+          fechaPago: new Date(),
+          metodoPago,
+          comprobantePago,
+          habilitada: true,
+          fechaActualizacion: new Date(),
+        },
+        { new: true }
+      )
+      .populate(
+        'paciente',
+        'pacienteNombre pacienteApellido pacienteDocumento pacienteTelefono'
+      )
       .populate('medico', 'medicoNombre medicoApellido especialidad')
       .populate('tratamiento', 'nombre precio');
 

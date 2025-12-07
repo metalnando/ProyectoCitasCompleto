@@ -1,10 +1,13 @@
 import React from "react";
 import { Container, Row, Col, ListGroup } from "react-bootstrap";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Footer() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <footer className="info-footer py-5 mt-auto"> 
+    <footer className="info-footer py-5 mt-auto">
       <Container>
         <Row className="justify-content-center text-center text-md-start">
           <Col md={4} className="mb-4 mb-md-0">
@@ -13,10 +16,10 @@ function Footer() {
               Tu clínica dental de confianza. Cuidamos tu sonrisa con dedicación y la más alta calidad.
             </p>
             <div className="social-icons mt-3">
-              <a href="https://facebook.com/belasunrise" target="_blank" rel="noopener noreferrer" className="me-3 text-primary-odont fs-4">
+              <a href="https://facebook.com/belasunrise34" target="_blank" rel="noopener noreferrer" className="me-3 text-primary-odont fs-4">
                 <i className="bi bi-facebook"></i>
               </a>
-              <a href="https://instagram.com/belasunrise" target="_blank" rel="noopener noreferrer" className="me-3 text-primary-odont fs-4">
+              <a href="https://instagram.com/belasunris3e" target="_blank" rel="noopener noreferrer" className="me-3 text-primary-odont fs-4">
                 <i className="bi bi-instagram"></i>
               </a>
               <a href="https://wa.me/3217759280" target="_blank" rel="noopener noreferrer" className="text-primary-odont fs-4">
@@ -37,12 +40,21 @@ function Footer() {
               <ListGroup.Item as={Link} to="/especialistas" className="bg-transparent border-0 py-1 text-muted hover-grow">
                 Nuestros Especialistas
               </ListGroup.Item>
-              <ListGroup.Item as={Link} to="/historial" className="bg-transparent border-0 py-1 text-muted hover-grow">
-                Mi Historial Clínico
-              </ListGroup.Item>
-              <ListGroup.Item as={Link} to="/login" className="bg-transparent border-0 py-1 text-muted hover-grow">
-                Iniciar Sesión
-              </ListGroup.Item>
+              {isAuthenticated && (
+                <ListGroup.Item as={Link} to="/historial" className="bg-transparent border-0 py-1 text-muted hover-grow">
+                  Mi Historial Clínico
+                </ListGroup.Item>
+              )}
+              {!isAuthenticated && (
+                <ListGroup.Item as={Link} to="/login" className="bg-transparent border-0 py-1 text-muted hover-grow">
+                  Iniciar Sesión
+                </ListGroup.Item>
+              )}
+              
+                <ListGroup.Item as={Link} to ="/sobre-nosotros" className="bg-transparent border-0 py-1 text-muted hover-grow">
+                    Sobre Nosotros
+                </ListGroup.Item>
+              
             </ListGroup>
           </Col>
 
@@ -58,7 +70,7 @@ function Footer() {
             </p>
             <p className="text-muted mb-0">
               <i className="bi bi-envelope-fill me-2 text-info"></i>
-              belasunrise@gmail.com
+              citasmedicasplus@gmail.com
             </p>
           </Col>
         </Row>
@@ -66,7 +78,7 @@ function Footer() {
         <Row>
           <Col className="text-center text-muted">
             <p className="mb-0">
-              &copy; {new Date().getFullYear()} **Bela Sunrise**. Todos los derechos reservados.
+              &copy; {new Date().getFullYear()} **BelaSunrise {/**Todos los derechos reservados. */} 
             </p>
           </Col>
         </Row>

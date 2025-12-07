@@ -11,6 +11,7 @@ import { UserModel, usuariosSchema } from 'src/usuarios/schema/usuarios.schema';
 import { medicoModel, medicoSchema } from 'src/medico/schema/medico.schema';
 import { tratamientoSchema } from 'src/tratamientos/schema/tratamiento.schema';
 import { PacienteExistentePipe } from './pipes/pacienteExistente.pipe';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PacienteExistentePipe } from './pipes/pacienteExistente.pipe';
       { name: medicoModel.name, schema: medicoSchema },
       { name: 'Tratamiento', schema: tratamientoSchema },
     ]), //'citas.name '
+    NotificationsModule,
   ],
   controllers: [CitasController],
   providers: [CitasService, PacienteExistentePipe],

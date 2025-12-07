@@ -13,11 +13,12 @@ import { FacturasModule } from './facturas/facturas.module';
 import { ConfigModule } from '@nestjs/config';
 import { TratamientoModule } from './tratamientos/tratamiento.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
+import { HistoriaClinicaModule } from './historia-clinica/historia-clinica.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    //MongooseModule.forRoot('mongodb://localhost:27017/consultorio-medico'),
     MongooseModule.forRoot(process.env.MONGODB_URL!),
 
     HttpModule,
@@ -30,6 +31,8 @@ import { EstadisticasModule } from './estadisticas/estadisticas.module';
     FacturasModule,
     AuthModule,
     EstadisticasModule,
+    HistoriaClinicaModule,
+    NotificationsModule,
   ],
 
   controllers: [AppController],

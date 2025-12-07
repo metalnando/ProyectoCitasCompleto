@@ -15,11 +15,30 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { MedicoService } from './medico.service';
 import { createMedicoDto } from './dto/crear-medico.dto';
+import { LoginMedicoDto } from './dto/login-medico.dto';
 import { IMedico } from './schema/medico.schema';
 
 @Controller('/medico')
 export class MedicoController {
   constructor(private readonly medicoService: MedicoService) {}
+
+  // Login de médico
+  @Post('login')
+  async login(@Body() loginMedicoDto: LoginMedicoDto) {
+    return this.medicoService.loginMedico(
+      loginMedicoDto.email,
+      loginMedicoDto.password
+    );
+  }
+
+  // Establecer contraseña para médico
+  @Put(':id/password')
+  async setPassword(
+    @Param('id') id: string,
+    @Body() body: { password: string }
+  ) {
+    return this.medicoService.setPassword(id, body.password);
+  }
 
   @Post()
   @UseInterceptors(

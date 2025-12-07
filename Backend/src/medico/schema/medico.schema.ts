@@ -5,9 +5,11 @@ export const medicoSchema = new Schema({
   medicoApellido: { type: String, required: true },
   medicoDocumento: { type: String, required: true },
   medicoTelefono: { type: String, required: true },
-  medicoEmail: { type: String, required: true },
+  medicoEmail: { type: String, required: true, unique: true },
   especialidad: { type: String, required: false, default: 'General' },
   imagen: { type: String, required: false, default: '' },
+  password: { type: String, required: false },
+  activo: { type: Boolean, required: false, default: true },
 });
 
 export interface IMedico extends Document {
@@ -18,6 +20,8 @@ export interface IMedico extends Document {
   medicoEmail: string;
   especialidad?: string;
   imagen?: string;
+  password?: string;
+  activo?: boolean;
 }
 
 export const medicoModel = { name: 'Medicos', schema: medicoSchema };

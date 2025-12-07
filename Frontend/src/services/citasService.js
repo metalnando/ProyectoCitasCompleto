@@ -161,11 +161,11 @@ class CitasService {
   }
 
   /**
-   * Actualizar cita
+   * Actualizar cita (actualización parcial)
    */
   async actualizarCita(id, citaData) {
     try {
-      const response = await fetch(`${API_ENDPOINTS.CITAS}/${id}`, {
+      const response = await fetch(`${API_ENDPOINTS.CITAS}/${id}/parcial`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(citaData),
@@ -265,22 +265,73 @@ class CitasService {
 
   /**
    * Registrar pago de una cita
+   * @param {string} citaId - ID de la cita
+   * @param {string|object} metodoPagoOrData - Método de pago (string) o objeto con datos completos
+   * @param {string} comprobantePago - Comprobante de pago (opcional si se pasa objeto)
    */
-  async registrarPago(citaId, metodoPago, comprobantePago = null) {
+  async registrarPago(citaId, metodoPagoOrData, comprobantePago = null) {
     try {
+      // Determinar si se pasó un objeto o parámetros separados
+      let bodyData;
+      if (typeof metodoPagoOrData === 'object') {
+        // Si es un objeto, extraer los campos necesarios
+        bodyData = {
+          metodoPago: metodoPagoOrData.metodoPago,
+          comprobantePago: metodoPagoOrData.comprobantePago
+        };
+      } else {
+        // Si son parámetros separados
+        bodyData = {
+          metodoPago: metodoPagoOrData,
+          comprobantePago: comprobantePago
+        };
+      }
+
       const response = await fetch(`${API_ENDPOINTS.CITAS}/${citaId}/pagar`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          metodoPago,
-          comprobantePago,
-        }),
+        body: JSON.stringify(bodyData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al registrar el pago');
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Error de conexión con el servidor'
+      };
+    }
+  }
+
+  /**
+   * Obtener mis citas (del usuario autenticado)
+   */
+  async obtenerMisCitas() {
+    try {
+      // Obtener el usuario del localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const user = JSON.parse(userStr);
+
+      // Buscar el paciente asociado al usuario
+      // Primero intentamos buscar por el ID del usuario
+      const response = await fetch(`${API_ENDPOINTS.CITAS}/usuario/${user._id}`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al obtener las citas');
       }
 
       return { success: true, data };

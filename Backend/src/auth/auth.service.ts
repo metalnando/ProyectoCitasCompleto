@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
@@ -13,15 +13,27 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-    return this.usuariosService.loginUser(loginDto.email, loginDto.password);
+    try {
+      return await this.usuariosService.loginUser(loginDto.email, loginDto.password);
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Credenciales inválidas');
+    }
   }
 
   async refreshToken(refreshToken: string) {
-    return this.usuariosService.refreshToken(refreshToken);
+    try {
+      return await this.usuariosService.refreshToken(refreshToken);
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Token inválido');
+    }
   }
 
   async register(createAuthDto: CreateAuthDto) {
-    return this.usuariosService.createUsuarios(createAuthDto as any);
+    try {
+      return await this.usuariosService.createUsuarios(createAuthDto as any);
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Error al registrar usuario');
+    }
   }
 
   async validateUser(userId: string) {
@@ -29,22 +41,22 @@ export class AuthService {
   }
 
   create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+    return 'Crea un nuevo usuario de auth';
   }
 
   findAll() {
-    return `This action returns all auth`;
+    return `Devuelve todos los usuarios de auth`;
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} auth`;
+    return `Devuelvbe un usuario con ID #${id} auth`;
   }
 
   update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+    return `Actualiza usuario con ID #${id} auth`;
   }
 
   remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return `Remueve un usuario con ID #${id} auth`;
   }
 }
