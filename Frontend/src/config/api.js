@@ -1,5 +1,6 @@
 // Configuración de la API
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export default API_BASE_URL;
 
 export const API_ENDPOINTS = {
   // Auth - usando el controlador de usuarios
@@ -59,3 +60,6 @@ export const getAuthHeaders = () => {
     ...(token && { 'Authorization': `Bearer ${token}` }),
   };
 };
+
+
+
